@@ -1,6 +1,6 @@
 {
   "name": "erc-4908",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Gated resources NFT access, an extension of EIP-721",
   "main": "index.js",
   "repository": {
