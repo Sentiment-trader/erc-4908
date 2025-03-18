@@ -6,7 +6,6 @@ import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/
 import {IERC4908} from "./IERC4908.sol";
 
 abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
-    bytes4 public constant INTERFACE_ID_ERC4908 = 0x1c7e6f13;
 
     struct Settings {
         string resourceId;
@@ -170,9 +169,12 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
         super._increaseBalance(account, value);
     }
 
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(ERC721, ERC721Enumerable) returns (bool) {
-        return interfaceId == INTERFACE_ID_ERC4908 || super.supportsInterface(interfaceId);
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC721Enumerable) returns (bool) {
+        return
+            interfaceId == type(IERC4908).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 }
