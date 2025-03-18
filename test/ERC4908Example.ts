@@ -350,7 +350,24 @@ describe("ERC4908", function () {
     it("Should support ERC4908 interface", async function () {
       /* Arrange */
       const { erc4908Example } = await loadFixture(deployERC4908ExampleFixture);
-      const INTERFACE_ID_ERC4908 = "0x1c7e6f13";
+      
+      // Calculate interface ID from function selectors
+      const functionSelectors = [
+        "setAccess(string,uint256,uint32)",
+        "delAccess(string)",
+        "hasAccess(address,string,address)",
+        "existAccess(bytes32)",
+        "existAccess(address,string)",
+        "getAccessControl(address,string)",
+        "mint(address,string,address)"
+      ].map(sig => keccak256(encodePacked(['string'], [sig])).slice(0, 10));
+
+      // XOR all function selectors to get interface ID
+      let interfaceIdBN = BigInt(functionSelectors[0]);
+      for (let i = 1; i < functionSelectors.length; i++) {
+        interfaceIdBN ^= BigInt(functionSelectors[i]);
+      }
+      const INTERFACE_ID_ERC4908 = `0x${interfaceIdBN.toString(16).padStart(8, '0')}` as `0x${string}`;
 
       /* Act */
       const supportsERC4908 = await erc4908Example.read.supportsInterface([INTERFACE_ID_ERC4908]);
