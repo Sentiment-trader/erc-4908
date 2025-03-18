@@ -345,4 +345,102 @@ describe("ERC4908", function () {
       expect(hasAccess).to.equal(true);
     });
   });
+
+  describe("Interface support", function () {
+    it("Should support ERC4908 interface", async function () {
+      /* Arrange */
+      const { erc4908Example } = await loadFixture(deployERC4908ExampleFixture);
+      const INTERFACE_ID_ERC4908 = "0x1c7e6f13";
+
+      /* Act */
+      const supportsERC4908 = await erc4908Example.read.supportsInterface([INTERFACE_ID_ERC4908]);
+
+      /* Assert */
+      expect(supportsERC4908).to.equal(true);
+    });
+
+    it("Should support ERC721 and ERC721Enumerable interfaces", async function () {
+      /* Arrange */
+      const { erc4908Example } = await loadFixture(deployERC4908ExampleFixture);
+      const INTERFACE_ID_ERC721 = "0x80ac58cd";
+      const INTERFACE_ID_ERC721_ENUMERABLE = "0x780e9d63";
+
+      /* Act */
+      const supportsERC721 = await erc4908Example.read.supportsInterface([INTERFACE_ID_ERC721]);
+      const supportsERC721Enumerable = await erc4908Example.read.supportsInterface([INTERFACE_ID_ERC721_ENUMERABLE]);
+
+      /* Assert */
+      expect(supportsERC721).to.equal(true);
+      expect(supportsERC721Enumerable).to.equal(true);
+    });
+
+    it("Should not support unsupported interfaces", async function () {
+      /* Arrange */
+      const { erc4908Example } = await loadFixture(deployERC4908ExampleFixture);
+      const UNSUPPORTED_INTERFACE = "0x12345678";
+
+      /* Act */
+      const supportsUnsupported = await erc4908Example.read.supportsInterface([UNSUPPORTED_INTERFACE]);
+
+      /* Assert */
+      expect(supportsUnsupported).to.equal(false);
+    });
+  });
+
+  describe("Edge cases", function () {
+    it("Should handle zero price minting", async function () {
+      /* Arrange */
+      const { erc4908Example, wallets } = await loadFixture(deployERC4908ExampleFixture);
+      const [Alice, Bob] = wallets;
+      const resourceId = "test-resource";
+      const price = 0n;
+      const expirationDuration = 3600;
+
+      let alice = await impersonate(erc4908Example, Alice);
+      let bob = await impersonate(erc4908Example, Bob);
+
+      /* Act */
+      await alice.write.setAccess([resourceId, price, expirationDuration]);
+      await bob.write.mint([Alice.account.address, resourceId, Bob.account.address], { value: price });
+
+      /* Assert */
+      const [hasAccess] = await erc4908Example.read.hasAccess([Alice.account.address, resourceId, Bob.account.address]);
+      expect(hasAccess).to.equal(true);
+    });
+
+    it("Should not allow empty resourceId", async function () {
+      /* Arrange */
+      const { erc4908Example, wallet } = await loadFixture(deployERC4908ExampleFixture);
+      const resourceId = "";
+      const price = 1n;
+      const expirationDuration = 3600;
+
+      /* Act */
+      await erc4908Example.write.setAccess([resourceId, price, expirationDuration]);
+
+      /* Assert */
+      const exists = await erc4908Example.read.existAccess([wallet.account.address, resourceId]);
+      expect(exists).to.equal(false);
+    });
+
+    it("Should handle large expiration duration", async function () {
+      /* Arrange */
+      const { erc4908Example, wallets } = await loadFixture(deployERC4908ExampleFixture);
+      const [Alice, Bob] = wallets;
+      const resourceId = "test-resource";
+      const price = 1n;
+      const expirationDuration = 0x7FFFFFFF; // Large but safe uint32 value
+
+      let alice = await impersonate(erc4908Example, Alice);
+      let bob = await impersonate(erc4908Example, Bob);
+
+      /* Act */
+      await alice.write.setAccess([resourceId, price, expirationDuration]);
+      await bob.write.mint([Alice.account.address, resourceId, Bob.account.address], { value: price });
+
+      /* Assert */
+      const [hasAccess] = await erc4908Example.read.hasAccess([Alice.account.address, resourceId, Bob.account.address]);
+      expect(hasAccess).to.equal(true);
+    });
+  });
 });
