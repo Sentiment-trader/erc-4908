@@ -7,10 +7,14 @@ interface IERC4908 {
     /// @param resourceId The content identification from the off-chain content service provider
     /// @param price The mint price, in other terms the access price for this particular content
     /// @param expirationDuration The expiration time of the access
+    /// @param coOwner The address of the co-owner, if any, who will share the access fee
+    /// @param splitFee The percentage of the access fee that will be sent to the co-owner, 0-10000 (100% = 10000)
     function setAccess(
         string calldata resourceId,
         uint256 price,
-        uint32 expirationDuration
+        uint32 expirationDuration,
+        address coOwner,
+        uint32 splitFee
     ) external;
 
     /// @notice Disallows content access NFT to be minted, the remaining NFTs can still be used
@@ -60,10 +64,12 @@ interface IERC4908 {
     /// @param resourceId The content identification from the off-chain service provider
     /// @return price The mint price, in other terms the access price for this particular resource
     /// @return expirationDuration The duration of the access for each NFT minted
+    /// @return coOwner The address of the co-owner, if any, who will share the access fee
+    /// @return splitFee The percentage of the access fee that will be sent to the co-owner, 0-10000 (100% = 10000)
     function getAccessControl(
         address author,
         string calldata resourceId
-    ) external view returns (uint256 price, uint32 expirationDuration);
+    ) external view returns (uint256 price, uint32 expirationDuration, address coOwner, uint32 splitFee);
 
     /// @notice Mints a content access NFT
     /// @dev This function is meant to be called by the content consumer
