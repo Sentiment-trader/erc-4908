@@ -6,7 +6,6 @@ import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/
 import {IERC4908} from "./IERC4908.sol";
 
 abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
-
     struct Settings {
         string resourceId;
         uint256 price;
@@ -46,7 +45,13 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
         uint32 splitFee
     ) private {
         bytes32 hash = _hash(author, resourceId);
-        accessControl[hash] = Settings(resourceId, price, expirationDuration, coOwner, splitFee);
+        accessControl[hash] = Settings(
+            resourceId,
+            price,
+            expirationDuration,
+            coOwner,
+            splitFee
+        );
     }
 
     function setAccess(
@@ -56,13 +61,20 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
         address coOwner,
         uint32 splitFee
     ) public {
-        _setAccess(msg.sender, resourceId, price, expirationDuration, coOwner, splitFee);
+        _setAccess(
+            msg.sender,
+            resourceId,
+            price,
+            expirationDuration,
+            coOwner,
+            splitFee
+        );
     }
 
     function existAccess(bytes32 hash) external view returns (bool) {
         return bytes(accessControl[hash].resourceId).length != 0;
     }
-    
+
     function existAccess(
         address author,
         string calldata resourceId
@@ -77,7 +89,12 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
         external
         view
         override
-        returns (uint256 price, uint32 expirationDuration, address coOwner, uint32 splitFee)
+        returns (
+            uint256 price,
+            uint32 expirationDuration,
+            address coOwner,
+            uint32 splitFee
+        )
     {
         bytes32 hash = _hash(author, resourceId);
         return (
@@ -181,7 +198,9 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC721Enumerable) returns (bool) {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC721, ERC721Enumerable) returns (bool) {
         return
             interfaceId == type(IERC4908).interfaceId ||
             super.supportsInterface(interfaceId);

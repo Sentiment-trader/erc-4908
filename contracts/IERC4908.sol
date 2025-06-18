@@ -69,7 +69,15 @@ interface IERC4908 {
     function getAccessControl(
         address author,
         string calldata resourceId
-    ) external view returns (uint256 price, uint32 expirationDuration, address coOwner, uint32 splitFee);
+    )
+        external
+        view
+        returns (
+            uint256 price,
+            uint32 expirationDuration,
+            address coOwner,
+            uint32 splitFee
+        );
 
     /// @notice Mints a content access NFT
     /// @dev This function is meant to be called by the content consumer
