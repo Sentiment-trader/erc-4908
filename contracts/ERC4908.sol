@@ -11,6 +11,8 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
         string resourceId;
         uint256 price;
         uint32 expirationDuration;
+        address coOwner;
+        uint32 splitFee;
     }
     mapping(bytes32 => Settings) public accessControl;
 
@@ -39,23 +41,28 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
         address author,
         string calldata resourceId,
         uint256 price,
-        uint32 expirationDuration
+        uint32 expirationDuration,
+        address coOwner,
+        uint32 splitFee
     ) private {
         bytes32 hash = _hash(author, resourceId);
-        accessControl[hash] = Settings(resourceId, price, expirationDuration);
+        accessControl[hash] = Settings(resourceId, price, expirationDuration, coOwner, splitFee);
     }
 
     function setAccess(
         string calldata resourceId,
         uint256 price,
-        uint32 expirationDuration
+        uint32 expirationDuration,
+        address coOwner,
+        uint32 splitFee
     ) public {
-        _setAccess(msg.sender, resourceId, price, expirationDuration);
+        _setAccess(msg.sender, resourceId, price, expirationDuration, coOwner, splitFee);
     }
 
     function existAccess(bytes32 hash) external view returns (bool) {
         return bytes(accessControl[hash].resourceId).length != 0;
     }
+    
     function existAccess(
         address author,
         string calldata resourceId
@@ -70,12 +77,14 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
         external
         view
         override
-        returns (uint256 price, uint32 expirationDuration)
+        returns (uint256 price, uint32 expirationDuration, address coOwner, uint32 splitFee)
     {
         bytes32 hash = _hash(author, resourceId);
         return (
             accessControl[hash].price,
-            accessControl[hash].expirationDuration
+            accessControl[hash].expirationDuration,
+            accessControl[hash].coOwner,
+            accessControl[hash].splitFee
         );
     }
 
@@ -88,11 +97,11 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
         if (!this.existAccess(settingsIndex))
             revert MintUnavailable(settingsIndex);
 
-        uint256 price = accessControl[settingsIndex].price;
+        // uint256 price = accessControl[settingsIndex].price;
 
-        if (msg.value < price) {
-            revert InsufficientFunds(price);
-        }
+        // if (msg.value < price) {
+        //     revert InsufficientFunds(price);
+        // }
 
         uint256 tokenId = totalSupply();
 
@@ -103,7 +112,7 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
                 uint32(block.timestamp)
         );
 
-        author.transfer(msg.value);
+        // author.transfer(msg.value);
 
         _safeMint(to, tokenId);
     }
