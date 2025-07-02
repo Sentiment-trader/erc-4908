@@ -1,4 +1,5 @@
 import hre from "hardhat";
+import { zeroAddress } from "viem";
 
 /*
  * { impersonateAccount } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
@@ -16,6 +17,8 @@ const paramsDefault = {
   resourceId: "7f0e683bd119688847070f0a4476d078b95399a2843ca1c549cdcdbafee0792f",
   price: BigInt(2),
   expirationDuration: 3,
+  coOwner: zeroAddress,
+  splitFee: 0,
 };
 
 async function increaseTime(seconds: number) {
