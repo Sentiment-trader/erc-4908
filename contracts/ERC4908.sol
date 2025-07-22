@@ -11,6 +11,8 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
         string resourceId;
         uint256 price;
         uint32 expirationDuration;
+        address coOwner;
+        uint32 splitFee; // base 10000 (ex: 3000 = 30%)
     }
     mapping(bytes32 => Settings) public accessControl;
 
@@ -31,7 +33,7 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
     function _hash(
         address author,
         string calldata resourceId
-    ) private pure returns (bytes32) {
+    ) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(author, resourceId));
     }
 
@@ -39,18 +41,22 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
         address author,
         string calldata resourceId,
         uint256 price,
-        uint32 expirationDuration
+        uint32 expirationDuration,
+        address coOwner,
+        uint32 splitFee
     ) private {
         bytes32 hash = _hash(author, resourceId);
-        accessControl[hash] = Settings(resourceId, price, expirationDuration);
+        accessControl[hash] = Settings(resourceId, price, expirationDuration, coOwner, splitFee);
     }
 
     function setAccess(
         string calldata resourceId,
         uint256 price,
-        uint32 expirationDuration
+        uint32 expirationDuration,
+        address coOwner,
+        uint32 splitFee
     ) public {
-        _setAccess(msg.sender, resourceId, price, expirationDuration);
+        _setAccess(msg.sender, resourceId, price, expirationDuration, coOwner, splitFee);
     }
 
     function existAccess(bytes32 hash) external view returns (bool) {
@@ -70,42 +76,15 @@ abstract contract ERC4908 is IERC4908, ERC721, ERC721Enumerable {
         external
         view
         override
-        returns (uint256 price, uint32 expirationDuration)
+        returns (uint256 price, uint32 expirationDuration, address coOwner, uint32 splitFee)
     {
         bytes32 hash = _hash(author, resourceId);
         return (
             accessControl[hash].price,
-            accessControl[hash].expirationDuration
+            accessControl[hash].expirationDuration,
+            accessControl[hash].coOwner,
+            accessControl[hash].splitFee
         );
-    }
-
-    function mint(
-        address payable author,
-        string calldata resourceId,
-        address to
-    ) public payable virtual {
-        bytes32 settingsIndex = _hash(author, resourceId);
-        if (!this.existAccess(settingsIndex))
-            revert MintUnavailable(settingsIndex);
-
-        uint256 price = accessControl[settingsIndex].price;
-
-        if (msg.value < price) {
-            revert InsufficientFunds(price);
-        }
-
-        uint256 tokenId = totalSupply();
-
-        nftData[tokenId] = Metadata(
-            settingsIndex,
-            accessControl[settingsIndex].resourceId,
-            accessControl[settingsIndex].expirationDuration +
-                uint32(block.timestamp)
-        );
-
-        author.transfer(msg.value);
-
-        _safeMint(to, tokenId);
     }
 
     function hasAccess(

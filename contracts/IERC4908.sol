@@ -7,10 +7,14 @@ interface IERC4908 {
     /// @param resourceId The content identification from the off-chain content service provider
     /// @param price The mint price, in other terms the access price for this particular content
     /// @param expirationDuration The expiration time of the access
+    /// @param coOwner The address of the co-owner of the content, if any
+    /// @param splitFee The fee split percentage for the co-owner, base 10000 (ex: 3000 = 30%)
     function setAccess(
         string calldata resourceId,
         uint256 price,
-        uint32 expirationDuration
+        uint32 expirationDuration,
+        address coOwner,
+        uint32 splitFee
     ) external;
 
     /// @notice Disallows content access NFT to be minted, the remaining NFTs can still be used
@@ -60,21 +64,12 @@ interface IERC4908 {
     /// @param resourceId The content identification from the off-chain service provider
     /// @return price The mint price, in other terms the access price for this particular resource
     /// @return expirationDuration The duration of the access for each NFT minted
+    /// @return coOwner The address of the co-owner of the content, if any
+    /// @return splitFee The fee split percentage for the co-owner, base 10000 (ex: 3000 = 30%)
     function getAccessControl(
         address author,
         string calldata resourceId
-    ) external view returns (uint256 price, uint32 expirationDuration);
-
-    /// @notice Mints a content access NFT
-    /// @dev This function is meant to be called by the content consumer
-    /// @param author address hashed with resourceId to retrieve the content settings specified by the author
-    /// @param resourceId The content identification from the off-chain content service provider
-    /// @param to The address of the content consumer
-    function mint(
-        address payable author,
-        string calldata resourceId,
-        address to
-    ) external payable;
+    ) external view returns (uint256 price, uint32 expirationDuration, address coOwner, uint32 splitFee);
 
     /// @notice The author hasn't activated mint access for this resourceId
     /// @param accessHash The hash of the author and resourceId, used as the index of settings mapping

@@ -1,6 +1,6 @@
 # ERC-4908: Gated resources NFT access
 
-Tailored for the needs of the [Ipal platform](https://app.ipal.network/), a web3 friendly [knowledge management platform](https://en.wikipedia.org/wiki/Knowledge_management_software).
+Tailored for the needs of the [Ipal platform](https://ipal.network/), a web3 friendly [knowledge management platform](https://en.wikipedia.org/wiki/Knowledge_management_software).
 See the [specification](./ERC4908.md) for more details.
 
 ## Platform implementation
